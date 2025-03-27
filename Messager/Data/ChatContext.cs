@@ -6,10 +6,8 @@ using Microsoft.EntityFrameworkCore;
 
 public class ChatContext : DbContext
 {
-    private DbSet<User> users { get; }
-    private DbSet<Message> messages { get; }
-    public DbSet<User> Users => users;
-    public DbSet<Message>Messages => messages;
+    public DbSet<User> Users { get; set; }
+    public DbSet<Message> Messages { get; set; }
 
     public ChatContext(DbContextOptions<ChatContext> options) : base(options)
     {

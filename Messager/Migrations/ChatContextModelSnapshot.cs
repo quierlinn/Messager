@@ -16,7 +16,7 @@ namespace Messager.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.0-preview.2.25163.8");
 
-            modelBuilder.Entity("Messager.Models.Message", b =>
+            modelBuilder.Entity("Message", b =>
                 {
                     b.Property<int>("id")
                         .ValueGeneratedOnAdd()
@@ -34,11 +34,7 @@ namespace Messager.Migrations
 
                     b.HasKey("id");
 
-                    b.HasIndex("receiverId");
-
-                    b.HasIndex("senderId");
-
-                    b.ToTable("Message");
+                    b.ToTable("Messages");
                 });
 
             modelBuilder.Entity("Messager.Models.User", b =>
@@ -57,26 +53,7 @@ namespace Messager.Migrations
 
                     b.HasKey("id");
 
-                    b.ToTable("User");
-                });
-
-            modelBuilder.Entity("Messager.Models.Message", b =>
-                {
-                    b.HasOne("Messager.Models.User", "receiver")
-                        .WithMany()
-                        .HasForeignKey("receiverId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Messager.Models.User", "sender")
-                        .WithMany()
-                        .HasForeignKey("senderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("receiver");
-
-                    b.Navigation("sender");
+                    b.ToTable("Users");
                 });
 #pragma warning restore 612, 618
         }

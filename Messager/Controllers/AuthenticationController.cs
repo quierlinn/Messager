@@ -2,18 +2,27 @@ using Messager.Data;
 using Messager.Models;
 using Microsoft.AspNetCore.Mvc;
 
-[Microsoft.AspNetCore.Components.Route("api/[controller]")]
+[Route("api/[controller]")]
 [ApiController]
-public class AuthenticationController(ChatContext context) : ControllerBase
+public class AuthenticationController : ControllerBase
 {
-    private readonly ChatContext context = context;
+    private readonly ChatContext context;
+
+    public AuthenticationController(ChatContext context)
+    {
+        this.context = context ?? throw new ArgumentNullException(nameof(context));
+    }
 
     [HttpPost("register")]
-    public async Task<IActionResult> Register(User user)
+    public async Task<IActionResult> Register([FromBody] User user)
     {
+        if (user == null || string.IsNullOrEmpty(user.userName) || string.IsNullOrEmpty(user.password))
+        {
+            return BadRequest("User  object, User Name, and Password are required.");
+        }
+
         context.Users.Add(user);
         await context.SaveChangesAsync();
         return Ok(user);
     }
-    
 }
