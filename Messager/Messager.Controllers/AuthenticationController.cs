@@ -1,4 +1,5 @@
 using Messager.Data;
+using Messager.Messager.Services;
 using Messager.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -6,11 +7,11 @@ using Microsoft.AspNetCore.Mvc;
 [ApiController]
 public class AuthenticationController : ControllerBase
 {
-    private readonly ChatContext context;
+    private readonly UserService _userService;
 
-    public AuthenticationController(ChatContext context)
+    public AuthenticationController(UserService userService)
     {
-        this.context = context ?? throw new ArgumentNullException(nameof(context));
+        _userService = userService;
     }
 
     [HttpPost("register")]
@@ -18,11 +19,10 @@ public class AuthenticationController : ControllerBase
     {
         if (user == null || string.IsNullOrEmpty(user.userName) || string.IsNullOrEmpty(user.password))
         {
-            return BadRequest("User  object, User Name, and Password are required.");
+            return BadRequest("Invalid user data");
         }
 
-        context.Users.Add(user);
-        await context.SaveChangesAsync();
+        await _userService.RegisterUserAsync(user);
         return Ok(user);
     }
 }
