@@ -24,6 +24,5 @@ public class MessageRepository : IMessageRepository
     public async Task AddAsync(Message message)
     {
         await context.Messages.AddAsync(message);
-        await context.SaveChangesAsync();
     }
 }

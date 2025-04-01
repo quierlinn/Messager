@@ -22,7 +22,14 @@ public class AuthenticationController : ControllerBase
             return BadRequest("Invalid user data");
         }
 
-        await _userService.RegisterUserAsync(user);
-        return Ok(user);
+        try
+        {
+            await _userService.RegisterUserAsync(user);
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, "An error occurred while registering the user");
+        }
     }
 }

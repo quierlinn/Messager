@@ -33,5 +33,9 @@ public class MessagesController : ControllerBase
         {
             return NotFound(ex.Message);
         }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ex.Message);
+        }
     }
 }
