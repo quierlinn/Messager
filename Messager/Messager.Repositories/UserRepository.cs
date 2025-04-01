@@ -28,6 +28,11 @@ public class UserRepository : IUserRepository
         await context.Users.AddAsync(user);
     }
 
+    public async Task SaveChangesAsync()
+    {
+        await context.SaveChangesAsync();
+    }
+
     public async Task<bool> UserExistsAsync(int id)
     {
         return await context.Users.AnyAsync(u => u.id == id);

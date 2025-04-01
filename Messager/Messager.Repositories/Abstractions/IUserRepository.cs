@@ -8,4 +8,5 @@ public interface IUserRepository
     Task<IEnumerable<User>> GetAllAsync();
     Task AddAsync(User user);
     Task<bool> UserExistsAsync(int id);
+    Task SaveChangesAsync();
 }

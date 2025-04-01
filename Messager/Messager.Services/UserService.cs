@@ -1,3 +1,4 @@
+using Messager.Data;
 using Messager.Messager.Services.Abstractions;
 using Messager.Models;
 
@@ -6,10 +7,12 @@ namespace Messager.Messager.Services;
 public class UserService : IUserService
 {
     private readonly IUserRepository userRepository;
+    private readonly ChatContext chatContext;
 
-    public UserService(IUserRepository userRepository)
+    public UserService(IUserRepository userRepository, ChatContext chatContext)
     {
         this.userRepository = userRepository;
+        this.chatContext = chatContext;
     }
 
     public async Task<User> GetByIdAsync(int id)
@@ -24,6 +27,17 @@ public class UserService : IUserService
 
     public async Task RegisterUserAsync(User user)
     {
-        await userRepository.AddAsync(user);
+        using var transaction = await chatContext.Database.BeginTransactionAsync();
+        try
+        {
+            await userRepository.AddAsync(user);
+            await userRepository.SaveChangesAsync();
+            await transaction.CommitAsync();
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
     }
 }
