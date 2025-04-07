@@ -19,19 +19,7 @@ public class MessagesController : ControllerBase
     [HttpPost("sendMessage")]
     public async Task<IActionResult> SendMessage([FromBody] Message message)
     {
-        if (message == null)
-        {
-            return BadRequest("Message object is required");
-        }
-
-        try
-        {
-            await messageService.SendMessageAsync(message);
-            return Ok(message);
-        }
-        catch (ArgumentNullException ex)
-        {
-            return NotFound(ex.Message);
-        }
+        await messageService.SendMessageAsync(message);
+        return Ok(message);
     }
 }

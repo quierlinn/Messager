@@ -1,26 +1,30 @@
 using Messager.Messager.Services.Abstractions;
-
-namespace Messager.Messager.Services;
+using Messager.Messager.UnitOfWork.Abstractions;
+using Messager.Messager.UnitOfWork.CustomExceptions;
 
 public class MessageService : IMessageService
 {
-    private readonly IMessageRepository _messageRepository;
-    private readonly IUserRepository _userRepository;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public MessageService(IMessageRepository messageRepository, IUserRepository userRepository)
+    public MessageService(IUnitOfWork unitOfWork)
     {
-        _messageRepository = messageRepository;
-        _userRepository = userRepository;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task SendMessageAsync(Message message)
     {
-        var senderExists = await _userRepository.UserExistsAsync(message.senderId);
-        var receiverExists = await _userRepository.UserExistsAsync(message.receiverId);
-        if (!senderExists || !receiverExists)
+        ArgumentNullException.ThrowIfNull(message);
+        var senderExists = await _unitOfWork.Users.UserExistsAsync(message.senderId);
+        if (!senderExists)
         {
-            throw new ArgumentException("Sender or receiver id not found");
+            throw new UserNotFoundException($"User {message.senderId} not found");
         }
-        await _messageRepository.AddAsync(message);
+        var receiverExists = await _unitOfWork.Users.UserExistsAsync(message.receiverId);
+        if (!receiverExists)
+        {
+            throw new UserNotFoundException($"User {message.receiverId} not found");
+        }
+        await _unitOfWork.Messages.AddAsync(message);
+        await _unitOfWork.CommitAsync();
     }
 }
