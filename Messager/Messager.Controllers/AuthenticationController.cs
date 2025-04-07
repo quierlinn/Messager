@@ -1,5 +1,6 @@
 using Messager.Data;
 using Messager.Messager.Services;
+using Messager.Messager.Services.Abstractions;
 using Messager.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,9 +8,9 @@ using Microsoft.AspNetCore.Mvc;
 [ApiController]
 public class AuthenticationController : ControllerBase
 {
-    private readonly UserService _userService;
+    private readonly IUserService _userService;
 
-    public AuthenticationController(UserService userService)
+    public AuthenticationController(IUserService userService)
     {
         _userService = userService;
     }
@@ -17,19 +18,8 @@ public class AuthenticationController : ControllerBase
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] User user)
     {
-        if (user == null || string.IsNullOrEmpty(user.userName) || string.IsNullOrEmpty(user.password))
-        {
-            return BadRequest("Invalid user data");
-        }
-
-        try
-        {
-            await _userService.RegisterUserAsync(user);
-            return Ok();
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, "An error occurred while registering the user");
-        }
+        ArgumentNullException.ThrowIfNull(user);
+        await _userService.RegisterUserAsync(user);
+        return Ok();
     }
 }

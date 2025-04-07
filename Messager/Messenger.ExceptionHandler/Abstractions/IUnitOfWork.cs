@@ -2,9 +2,9 @@ namespace Messager.Messager.UnitOfWork.Abstractions;
 
 public interface IUnitOfWork : IDisposable
 {
-    IUserRepository UserRepository { get; }
-    IMessageRepository MessageRepository { get; }
-    Task<int>CommitAsync();
+    public IUserRepository Users { get; }
+    public IMessageRepository Messages { get; }
+    Task CommitAsync();
     Task BeginTransactionAsync();
     Task CommitTransactionAsync();
     Task RollbackTransactionAsync();

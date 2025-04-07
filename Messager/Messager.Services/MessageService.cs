@@ -1,7 +1,6 @@
 using Messager.Messager.Services.Abstractions;
 using Messager.Messager.UnitOfWork.Abstractions;
-
-namespace Messager.Messager.Services;
+using Messager.Messager.UnitOfWork.CustomExceptions;
 
 public class MessageService : IMessageService
 {
@@ -14,23 +13,18 @@ public class MessageService : IMessageService
 
     public async Task SendMessageAsync(Message message)
     {
-        await _unitOfWork.BeginTransactionAsync();
-        try
+        ArgumentNullException.ThrowIfNull(message);
+        var senderExists = await _unitOfWork.Users.UserExistsAsync(message.senderId);
+        if (!senderExists)
         {
-            var senderExists = await _unitOfWork.UserRepository.UserExistsAsync(message.senderId);
-            var recieverExists = await _unitOfWork.UserRepository.UserExistsAsync(message.receiverId);
-            if (!senderExists || !recieverExists)
-            {
-                throw new ArgumentException("Sender or Receiver doesn't exist!");
-            }
-
-            await _unitOfWork.MessageRepository.AddAsync(message);
-            await _unitOfWork.CommitTransactionAsync();
+            throw new UserNotFoundException($"User {message.senderId} not found");
         }
-        catch
+        var receiverExists = await _unitOfWork.Users.UserExistsAsync(message.receiverId);
+        if (!receiverExists)
         {
-            await _unitOfWork.RollbackTransactionAsync();
-            throw;
+            throw new UserNotFoundException($"User {message.receiverId} not found");
         }
+        await _unitOfWork.Messages.AddAsync(message);
+        await _unitOfWork.CommitAsync();
     }
 }

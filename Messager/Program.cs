@@ -15,12 +15,20 @@ services.AddDbContext<ChatContext>(options =>
     options.UseSqlite(configuration.GetConnectionString("DefaultConnection")));
 
 services.AddScoped<IUserRepository, UserRepository>();
-services.AddScoped<IUnitOfWork, UnitOfWork>();
 services.AddScoped<IMessageRepository, MessageRepository>();
+
+services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+services.AddScoped<IUserService, UserService>();
 services.AddScoped<IMessageService, MessageService>();
+
+services.AddProblemDetails();
+
 services.AddControllers();
 
 var app = builder.Build();
+app.UseMiddleware<MessengerExceptionHandlerMiddleware>();
+app.UseExceptionHandler();
 app.UseAuthorization();
 app.MapControllers();
 

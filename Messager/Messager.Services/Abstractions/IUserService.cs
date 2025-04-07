@@ -4,10 +4,7 @@ namespace Messager.Messager.Services.Abstractions;
 
 public interface IUserService
 {
-
-    public Task<User> GetByIdAsync(int id);
-
-    public Task<IEnumerable<User>> GetAllAsync();
-
-    public Task RegisterUserAsync(User user);
+    Task<User> GetByIdAsync(int id);
+    Task<IEnumerable<User>> GetAllAsync();
+    Task RegisterUserAsync(User user);
 }

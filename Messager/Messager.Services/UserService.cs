@@ -1,43 +1,55 @@
 using Messager.Data;
 using Messager.Messager.Services.Abstractions;
+using Messager.Messager.UnitOfWork.Abstractions;
+using Messager.Messager.UnitOfWork.CustomExceptions;
 using Messager.Models;
 
 namespace Messager.Messager.Services;
 
 public class UserService : IUserService
 {
-    private readonly IUserRepository userRepository;
-    private readonly ChatContext chatContext;
+    private readonly IUserRepository _userRepository;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public UserService(IUserRepository userRepository, ChatContext chatContext)
+    public UserService(IUserRepository userRepository, IUnitOfWork unitOfWork)
     {
-        this.userRepository = userRepository;
-        this.chatContext = chatContext;
+        _userRepository = userRepository;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<User> GetByIdAsync(int id)
     {
-        return await userRepository.GetByIdAsync(id);
+        return await _userRepository.GetByIdAsync(id);
     }
 
     public async Task<IEnumerable<User>> GetAllAsync()
     {
-        return await userRepository.GetAllAsync();
+        return await _userRepository.GetAllAsync();
     }
 
     public async Task RegisterUserAsync(User user)
     {
-        using var transaction = await chatContext.Database.BeginTransactionAsync();
-        try
+        if (user == null)
         {
-            await userRepository.AddAsync(user);
-            await userRepository.SaveChangesAsync();
-            await transaction.CommitAsync();
+            throw new ArgumentNullException(nameof(user));
         }
-        catch
+
+        if (string.IsNullOrWhiteSpace(user.userName))
         {
-            await transaction.RollbackAsync();
-            throw;
+            throw new InvalidUserDataException("User name cannot be empty");
         }
+
+        if (string.IsNullOrWhiteSpace(user.password))
+        {
+            throw new InvalidUserDataException("Password cannot be empty");
+        }
+
+        if (await _userRepository.UsernameExistsAsync(user.userName))
+        {
+            throw new UserAlreadyExistsException(user.userName);
+        }
+        
+        await _unitOfWork.Users.AddAsync(user);
+        await _unitOfWork.CommitAsync();
     }
 }
